@@ -4,9 +4,20 @@
 <div class="card">
     <div class="card-header fw-bold">Edit Data UMKM</div>
     <div class="card-body">
+        @if ($errors->any())
+            <div class="alert alert-danger mb-4">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form action="{{ route('admin.umkms.update', $umkm->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
-            @method('PUT') <div class="mb-3">
+            @method('PUT')
+            <div class="mb-3">
                 <label>Nama UMKM</label>
                 <input type="text" name="nama_umkm" class="form-control" value="{{ old('nama_umkm', $umkm->nama_umkm) }}" required>
             </div>
@@ -15,7 +26,13 @@
                 <div class="col-md-6 mb-3">
                     <label>Kategori</label>
                     <div class="d-flex flex-column gap-2">
-                        @php $cats = is_array($umkm->kategori) ? $umkm->kategori : (json_decode($umkm->kategori, true) ?? [$umkm->kategori]); @endphp
+                        @php
+                            if (old('kategori') !== null) {
+                                $cats = old('kategori', []);
+                            } else {
+                                $cats = is_array($umkm->kategori) ? $umkm->kategori : (json_decode($umkm->kategori, true) ?? [$umkm->kategori]);
+                            }
+                        @endphp
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="kategori[]" value="Makanan Berat" id="cat1" {{ in_array('Makanan Berat', $cats) ? 'checked' : '' }}>
                             <label class="form-check-label" for="cat1">Makanan Berat</label>
@@ -32,7 +49,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>No WhatsApp</label>
-                    <input type="number" name="no_whatsapp" class="form-control" value="{{ old('no_whatsapp', $umkm->no_whatsapp) }}" required>
+                    <input type="text" name="no_whatsapp" class="form-control" value="{{ old('no_whatsapp', $umkm->no_whatsapp) }}" required>
                 </div>
             </div>
 
@@ -45,34 +62,43 @@
                 <label class="fw-bold fs-5 mb-2">Jadwal Operasional</label>
                 
                 @php
-                    // Auto-parsing logic to pre-fill values from existing strings
                     $scheduleData = [];
                     $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
                     $rawJam = $umkm->jam_operasional; 
                     $rawHari = $umkm->hari_operasional;
 
-                    // Initialize default (Closed)
-                    foreach($days as $d) {
-                        $scheduleData[$d] = ['buka' => false, 'start' => '', 'end' => ''];
-                    }
-
-                    // Check for "Setiap Hari" format
-                    if (str_contains($rawJam, 'Setiap Hari')) {
-                        // Extract time
-                        preg_match('/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/', $rawJam, $matches);
-                        if (!empty($matches)) {
-                            foreach($days as $d) {
-                                $scheduleData[$d] = ['buka' => true, 'start' => $matches[1], 'end' => $matches[2]];
-                            }
+                    // If there is old input from a failed validation, use that. Otherwise use database values.
+                    if (old('jadwal') !== null) {
+                        foreach($days as $d) {
+                            $isBuka = old("jadwal.$d.buka") ? true : false;
+                            $startVal = old("jadwal.$d.start", '');
+                            $endVal = old("jadwal.$d.end", '');
+                            $scheduleData[$d] = ['buka' => $isBuka, 'start' => $startVal, 'end' => $endVal];
                         }
                     } else {
-                        // Try parsing specific lines: "Senin: 08:00 - 17:00"
+                        // Initialize default (Closed)
                         foreach($days as $d) {
-                            if (preg_match("/$d:\s*(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/i", $rawJam, $matches)) {
-                                $scheduleData[$d] = ['buka' => true, 'start' => $matches[1], 'end' => $matches[2]];
-                            } elseif (str_contains($rawHari, $d) && preg_match('/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/', $rawJam, $matches)) {
-                                // Fallback: Day is in "hari_operasional" string and we have a generic time in "jam_operasional"
-                                $scheduleData[$d] = ['buka' => true, 'start' => $matches[1], 'end' => $matches[2]];
+                            $scheduleData[$d] = ['buka' => false, 'start' => '', 'end' => ''];
+                        }
+
+                        // Check for "Setiap Hari" format
+                        if (str_contains($rawJam, 'Setiap Hari')) {
+                            // Extract time
+                            preg_match('/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/', $rawJam, $matches);
+                            if (!empty($matches)) {
+                                foreach($days as $d) {
+                                    $scheduleData[$d] = ['buka' => true, 'start' => $matches[1], 'end' => $matches[2]];
+                                }
+                            }
+                        } else {
+                            // Try parsing specific lines: "Senin: 08:00 - 17:00"
+                            foreach($days as $d) {
+                                if (preg_match("/$d:\s*(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/i", $rawJam, $matches)) {
+                                    $scheduleData[$d] = ['buka' => true, 'start' => $matches[1], 'end' => $matches[2]];
+                                } elseif (str_contains($rawHari, $d) && preg_match('/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/', $rawJam, $matches)) {
+                                    // Fallback: Day is in "hari_operasional" string and we have a generic time in "jam_operasional"
+                                    $scheduleData[$d] = ['buka' => true, 'start' => $matches[1], 'end' => $matches[2]];
+                                }
                             }
                         }
                     }
@@ -179,7 +205,7 @@
             </div>
             
             <div class="form-check mb-4">
-                <input class="form-check-input" type="checkbox" name="is_delivery" value="1" id="del" {{ $umkm->is_delivery ? 'checked' : '' }}>
+                <input class="form-check-input" type="checkbox" name="is_delivery" value="1" id="del" {{ old('is_delivery', $umkm->is_delivery) ? 'checked' : '' }}>
                 <label class="form-check-label" for="del">Menyediakan Layanan Delivery?</label>
             </div>
 

@@ -4,41 +4,52 @@
 <div class="card">
     <div class="card-header">Tambah UMKM Baru</div>
     <div class="card-body">
+        @if ($errors->any())
+            <div class="alert alert-danger mb-4">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form action="{{ route('admin.umkms.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
             <div class="mb-3">
                 <label>Nama UMKM</label>
-                <input type="text" name="nama_umkm" class="form-control" required>
+                <input type="text" name="nama_umkm" class="form-control" value="{{ old('nama_umkm') }}" required>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label>Kategori</label>
                     <div class="d-flex flex-column gap-2">
+                        @php $oldKategori = old('kategori', []); @endphp
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="kategori[]" value="Makanan Berat" id="cat1">
+                            <input class="form-check-input" type="checkbox" name="kategori[]" value="Makanan Berat" id="cat1" {{ in_array('Makanan Berat', $oldKategori) ? 'checked' : '' }}>
                             <label class="form-check-label" for="cat1">Makanan Berat</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="kategori[]" value="Makanan Ringan" id="cat2">
+                            <input class="form-check-input" type="checkbox" name="kategori[]" value="Makanan Ringan" id="cat2" {{ in_array('Makanan Ringan', $oldKategori) ? 'checked' : '' }}>
                             <label class="form-check-label" for="cat2">Makanan Ringan</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="kategori[]" value="Minuman" id="cat3">
+                            <input class="form-check-input" type="checkbox" name="kategori[]" value="Minuman" id="cat3" {{ in_array('Minuman', $oldKategori) ? 'checked' : '' }}>
                             <label class="form-check-label" for="cat3">Minuman</label>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label>No WhatsApp (628xxx)</label>
-                    <input type="number" name="no_whatsapp" class="form-control" required>
+                    <label>No WhatsApp</label>
+                    <input type="text" name="no_whatsapp" class="form-control" value="{{ old('no_whatsapp') }}" required>
                 </div>
             </div>
 
             <div class="mb-3">
                 <label>Deskripsi</label>
-                <textarea name="deskripsi" class="form-control" rows="3" required></textarea>
+                <textarea name="deskripsi" class="form-control" rows="3" required>{{ old('deskripsi') }}</textarea>
             </div>
 
             <div class="mb-3">
@@ -62,19 +73,24 @@
                         </thead>
                         <tbody>
                             @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day)
+                            @php
+                                $isBuka = old("jadwal.$day.buka") ? true : false;
+                                $startVal = old("jadwal.$day.start", '');
+                                $endVal = old("jadwal.$day.end", '');
+                            @endphp
                             <tr>
                                 <td class="align-middle fw-bold">{{ $day }}</td>
                                 <td class="align-middle">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input day-toggle" type="checkbox" name="jadwal[{{ $day }}][buka]" value="1" id="check_{{ $day }}" onchange="toggleTime('{{ $day }}')">
+                                        <input class="form-check-input day-toggle" type="checkbox" name="jadwal[{{ $day }}][buka]" value="1" id="check_{{ $day }}" onchange="toggleTime('{{ $day }}')" {{ $isBuka ? 'checked' : '' }}>
                                         <label class="form-check-label" for="check_{{ $day }}">Buka</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="time" name="jadwal[{{ $day }}][start]" id="start_{{ $day }}" class="form-control form-control-sm" disabled>
+                                    <input type="time" name="jadwal[{{ $day }}][start]" id="start_{{ $day }}" class="form-control form-control-sm" value="{{ $startVal }}" {{ !$isBuka ? 'disabled' : '' }}>
                                 </td>
                                 <td>
-                                    <input type="time" name="jadwal[{{ $day }}][end]" id="end_{{ $day }}" class="form-control form-control-sm" disabled>
+                                    <input type="time" name="jadwal[{{ $day }}][end]" id="end_{{ $day }}" class="form-control form-control-sm" value="{{ $endVal }}" {{ !$isBuka ? 'disabled' : '' }}>
                                 </td>
                             </tr>
                             @endforeach
@@ -122,12 +138,12 @@
 
             <div class="mb-3">
                 <label>Alamat Lengkap</label>
-                <textarea name="alamat" class="form-control" rows="2" required></textarea>
+                <textarea name="alamat" class="form-control" rows="2" required>{{ old('alamat') }}</textarea>
             </div>
 
             <div class="mb-3">
                 <label>Link Google Maps / Koordinat (Opsional)</label>
-                <input type="text" name="koordinat" class="form-control" placeholder="Contoh: https://maps.google.com/...">
+                <input type="text" name="koordinat" class="form-control" value="{{ old('koordinat') }}" placeholder="Contoh: https://maps.google.com/...">
             </div>
 
             <div class="mb-3">
@@ -136,7 +152,7 @@
             </div>
             
             <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" name="is_delivery" value="1" id="del">
+                <input class="form-check-input" type="checkbox" name="is_delivery" value="1" id="del" {{ old('is_delivery') ? 'checked' : '' }}>
                 <label class="form-check-label" for="del">Bisa Delivery?</label>
             </div>
 

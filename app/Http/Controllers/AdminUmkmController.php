@@ -23,12 +23,33 @@ class AdminUmkmController extends Controller
     //simpan umkm baru
     public function store(Request $request) {
         $data = $request->validate([
-            'nama_umkm' => 'required', 'deskripsi' => 'required',
-            'no_whatsapp' => 'required', 'kategori' => 'required|array',
-            'gambar' => 'image', 'alamat' => 'required', 'koordinat' => 'nullable',
+            'nama_umkm' => 'required',
+            'deskripsi' => 'required',
+            'no_whatsapp' => 'required|regex:/^[0-9]+$/',
+            'kategori' => 'required|array',
+            'gambar' => 'image',
+            'alamat' => 'required',
+            'koordinat' => 'nullable',
+        ], [
+            'no_whatsapp.regex' => 'Nomor WhatsApp harus berupa angka saja tanpa huruf atau karakter lain.',
         ]);
 
         $jadwal = $request->input('jadwal', []);
+        $errors = [];
+        foreach ($jadwal as $day => $times) {
+            if (isset($times['buka'])) {
+                $start = $times['start'] ?? '';
+                $end = $times['end'] ?? '';
+                if (empty($start) || empty($end) || strtotime($start) >= strtotime($end)) {
+                    $errors["jadwal_$day"] = "Jam tutup pada hari $day harus setelah jam buka.";
+                }
+            }
+        }
+
+        if (!empty($errors)) {
+            return back()->withErrors($errors)->withInput();
+        }
+
         $bukaDays = [];
         $jamStrings = [];
 
@@ -84,9 +105,37 @@ class AdminUmkmController extends Controller
     //update data umkm
     public function update(Request $request, $id) {
         $umkm = Umkm::findOrFail($id);
-        $data = $request->except(['jadwal', 'gambar', 'is_delivery']); // Handle special fields manually
+
+        $request->validate([
+            'nama_umkm' => 'required',
+            'deskripsi' => 'required',
+            'no_whatsapp' => 'required|regex:/^[0-9]+$/',
+            'kategori' => 'required|array',
+            'gambar' => 'nullable|image',
+            'alamat' => 'required',
+            'koordinat' => 'nullable',
+        ], [
+            'no_whatsapp.regex' => 'Nomor WhatsApp harus berupa angka saja tanpa huruf atau karakter lain.',
+        ]);
 
         $jadwal = $request->input('jadwal', []);
+        $errors = [];
+        foreach ($jadwal as $day => $times) {
+            if (isset($times['buka'])) {
+                $start = $times['start'] ?? '';
+                $end = $times['end'] ?? '';
+                if (empty($start) || empty($end) || strtotime($start) >= strtotime($end)) {
+                    $errors["jadwal_$day"] = "Jam tutup pada hari $day harus setelah jam buka.";
+                }
+            }
+        }
+
+        if (!empty($errors)) {
+            return back()->withErrors($errors)->withInput();
+        }
+
+        $data = $request->except(['jadwal', 'gambar', 'is_delivery']); // Handle special fields manually
+
         $bukaDays = [];
         $jamStrings = [];
         $daysOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
