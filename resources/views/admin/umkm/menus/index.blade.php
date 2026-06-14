@@ -56,6 +56,21 @@
         <div class="col-md-8">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
+                    
+                    <!-- Search Bar -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <form action="{{ route('admin.umkm.menus.index', $umkm->id) }}" method="GET">
+                                <div class="input-group">
+                                    <input type="text" name="search" class="form-control" placeholder="Cari menu berdasarkan nama..." value="{{ request('search') }}" aria-label="Cari menu">
+                                    <button class="btn btn-primary px-4" type="submit">
+                                        <i class="bi bi-search me-1"></i> Cari
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
                     @if($menus->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
@@ -152,8 +167,14 @@
                         </div>
                     @else
                         <div class="text-center py-5">
-                            <i class="bi bi-egg-fried fs-1 text-muted"></i>
-                            <h6 class="mt-2 text-muted">Belum ada menu yang ditambahkan.</h6>
+                            @if(request('search'))
+                                <i class="bi bi-search fs-1 text-muted"></i>
+                                <h6 class="mt-2 text-muted">Menu "{{ request('search') }}" tidak ditemukan.</h6>
+                                <a href="{{ route('admin.umkm.menus.index', $umkm->id) }}" class="btn btn-sm btn-outline-secondary mt-2">Reset Pencarian</a>
+                            @else
+                                <i class="bi bi-egg-fried fs-1 text-muted"></i>
+                                <h6 class="mt-2 text-muted">Belum ada menu yang ditambahkan.</h6>
+                            @endif
                         </div>
                     @endif
                 </div>

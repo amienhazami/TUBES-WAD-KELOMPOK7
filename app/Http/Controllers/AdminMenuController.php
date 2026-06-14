@@ -10,10 +10,17 @@ use Illuminate\Support\Facades\Storage;
 class AdminMenuController extends Controller
 {
     //menampilkan menu
-    public function index($umkmId)
+    public function index(Request $request, $umkmId)
     {
         $umkm = Umkm::findOrFail($umkmId);
-        $menus = $umkm->menus()->latest()->get();
+        $search = $request->query('search');
+
+        $query = $umkm->menus();
+        if ($search) {
+            $query->where('nama_menu', 'like', '%' . $search . '%');
+        }
+
+        $menus = $query->latest()->get();
         return view('admin.umkm.menus.index', compact('umkm', 'menus'));
     }
 
