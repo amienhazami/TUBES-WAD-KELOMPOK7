@@ -59,14 +59,6 @@
     <div class="card-header">Tambah UMKM Baru</div>
     <div class="card-body">
 
-        {{-- ── Flash: Sukses (DTT-09 R1) ──────────────────────────────────── --}}
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                <i class="bi bi-check-circle me-1"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
         <form action="{{ route('admin.umkms.store') }}" method="POST" enctype="multipart/form-data" novalidate id="formUmkm">
             @csrf
 

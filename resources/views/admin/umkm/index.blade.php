@@ -29,13 +29,6 @@
                     </div>
                 </div>
 
-                @if(session('success'))
-                    <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <div>{{ session('success') }}</div>
-                    </div>
-                @endif
-
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="bg-light text-secondary">
