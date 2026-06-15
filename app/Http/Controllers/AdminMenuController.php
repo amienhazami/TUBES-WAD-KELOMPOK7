@@ -37,6 +37,12 @@ class AdminMenuController extends Controller
             'deskripsi' => 'nullable|string',
             'kategori' => 'required|string|in:Makanan Berat,Makanan Ringan,Minuman',
             'gambar' => 'nullable|image|max:2048', 
+        ], [
+            'harga.required' => 'Harga wajib diisi.',
+            'harga.numeric' => 'Harga harus berupa angka.',
+            'harga.min' => 'Harga tidak boleh kurang dari 0.',
+            'gambar.image' => 'Format file tidak didukung',
+            'gambar.max' => 'Ukuran file tidak boleh lebih dari 2MB.',
         ]);
 
         $data = $request->only(['nama_menu', 'harga', 'deskripsi', 'kategori']);
@@ -64,6 +70,12 @@ class AdminMenuController extends Controller
             'deskripsi' => 'nullable|string',
             'kategori' => 'required|string|in:Makanan Berat,Makanan Ringan,Minuman',
             'gambar' => 'nullable|image|max:2048',
+        ], [
+            'harga.required' => 'Harga wajib diisi.',
+            'harga.numeric' => 'Harga harus berupa angka.',
+            'harga.min' => 'Harga tidak boleh kurang dari 0.',
+            'gambar.image' => 'Format file tidak didukung',
+            'gambar.max' => 'Ukuran file tidak boleh lebih dari 2MB.',
         ]);
 
         $data = $request->only(['nama_menu', 'harga', 'deskripsi', 'kategori']);

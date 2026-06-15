@@ -13,6 +13,20 @@
             <h3 class="fw-bold mb-4">Kelola Menu: {{ $umkm->nama_umkm }}</h3>
         </div>
 
+        @if ($errors->any())
+            <div class="col-md-12">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Terjadi Kesalahan!</h6>
+                    <ul class="mb-0 ps-3">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
         <!-- Form Tambah Menu -->
         <div class="col-md-4">
             <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
@@ -24,27 +38,42 @@
                         @csrf
                         <div class="mb-3">
                             <label class="form-label">Nama Menu</label>
-                            <input type="text" name="nama_menu" class="form-control" required>
+                            <input type="text" name="nama_menu" class="form-control @error('nama_menu') is-invalid @enderror" value="{{ old('nama_menu') }}" required>
+                            @error('nama_menu')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Harga (Rp)</label>
-                            <input type="text" name="harga" class="form-control" required>
+                            <input type="text" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga') }}" required>
+                            @error('harga')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Kategori</label>
-                            <select name="kategori" class="form-select" required>
-                                <option value="Makanan Berat">Makanan Berat</option>
-                                <option value="Makanan Ringan">Makanan Ringan</option>
-                                <option value="Minuman">Minuman</option>
+                            <select name="kategori" class="form-select @error('kategori') is-invalid @enderror" required>
+                                <option value="Makanan Berat" {{ old('kategori') == 'Makanan Berat' ? 'selected' : '' }}>Makanan Berat</option>
+                                <option value="Makanan Ringan" {{ old('kategori') == 'Makanan Ringan' ? 'selected' : '' }}>Makanan Ringan</option>
+                                <option value="Minuman" {{ old('kategori') == 'Minuman' ? 'selected' : '' }}>Minuman</option>
                             </select>
+                            @error('kategori')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
-                            <textarea name="deskripsi" class="form-control" rows="2"></textarea>
+                            <textarea name="deskripsi" class="form-control @error('deskripsi') is-invalid @enderror" rows="2">{{ old('deskripsi') }}</textarea>
+                            @error('deskripsi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Gambar</label>
-                            <input type="file" name="gambar" class="form-control">
+                            <input type="file" name="gambar" class="form-control @error('gambar') is-invalid @enderror">
+                            @error('gambar')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Simpan Menu</button>
                     </form>
@@ -127,27 +156,42 @@
                                                                     @method('PUT')
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Nama Menu</label>
-                                                                        <input type="text" name="nama_menu" class="form-control" value="{{ $menu->nama_menu }}" required>
+                                                                        <input type="text" name="nama_menu" class="form-control @error('nama_menu') is-invalid @enderror" value="{{ $menu->nama_menu }}" required>
+                                                                        @error('nama_menu')
+                                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                                        @enderror
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Harga (Rp)</label>
-                                                                        <input type="text" name="harga" class="form-control" value="{{ $menu->harga }}" required>
+                                                                        <input type="text" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ $menu->harga }}" required>
+                                                                        @error('harga')
+                                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                                        @enderror
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Kategori</label>
-                                                                        <select name="kategori" class="form-select" required>
+                                                                        <select name="kategori" class="form-select @error('kategori') is-invalid @enderror" required>
                                                                             <option value="Makanan Berat" {{ $menu->kategori == 'Makanan Berat' ? 'selected' : '' }}>Makanan Berat</option>
                                                                             <option value="Makanan Ringan" {{ $menu->kategori == 'Makanan Ringan' ? 'selected' : '' }}>Makanan Ringan</option>
                                                                             <option value="Minuman" {{ $menu->kategori == 'Minuman' ? 'selected' : '' }}>Minuman</option>
                                                                         </select>
+                                                                        @error('kategori')
+                                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                                        @enderror
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Deskripsi</label>
-                                                                        <textarea name="deskripsi" class="form-control" rows="2">{{ $menu->deskripsi }}</textarea>
+                                                                        <textarea name="deskripsi" class="form-control @error('deskripsi') is-invalid @enderror" rows="2">{{ $menu->deskripsi }}</textarea>
+                                                                        @error('deskripsi')
+                                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                                        @enderror
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Ganti Gambar (Opsional)</label>
-                                                                        <input type="file" name="gambar" class="form-control">
+                                                                        <input type="file" name="gambar" class="form-control @error('gambar') is-invalid @enderror">
+                                                                        @error('gambar')
+                                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                                        @enderror
                                                                     </div>
                                                                     <div class="d-flex justify-content-end">
                                                                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Batal</button>
